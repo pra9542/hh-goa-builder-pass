@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "functions": {
+    "api/upload.js": {
+      "runtime": "nodejs20.x"
+    },
+    "api/share.js": {
+      "runtime": "nodejs20.x"
+    }
+  }
+}
