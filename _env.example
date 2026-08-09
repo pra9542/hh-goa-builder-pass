@@ -1,0 +1,7 @@
+# Cloudinary
+CLOUDINARY_CLOUD_NAME=dt8rfs8hh
+CLOUDINARY_API_KEY=886929856354562
+CLOUDINARY_API_SECRET=u0dTBVgc-zmsfYVxxwswvvt2xv0
+
+# Your deployed Vercel URL, e.g. https://hh-goa-2026.vercel.app
+PUBLIC_BASE_URL=https://hh-goa-builder-pass.vercel.app
