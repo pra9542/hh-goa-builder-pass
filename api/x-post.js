@@ -16,7 +16,6 @@ function parseCookies(cookieHeader = '') {
 }
 
 export default async function handler(req, res) {
-
   if (req.method !== 'POST') {
     return res.status(405).json({
       error: 'Method not allowed'
@@ -24,6 +23,9 @@ export default async function handler(req, res) {
   }
 
   try {
+    // --------------------------------
+    // 1. Get X access token
+    // --------------------------------
 
     const cookies = parseCookies(
       req.headers.cookie || ''
@@ -39,14 +41,9 @@ export default async function handler(req, res) {
       });
     }
 
-    /*
-     * Frontend sends:
-     *
-     * {
-     *   imageUrl: "...",
-     *   text: "..."
-     * }
-     */
+    // --------------------------------
+    // 2. Get image + text
+    // --------------------------------
 
     const {
       imageUrl,
@@ -59,16 +56,17 @@ export default async function handler(req, res) {
       });
     }
 
-    /*
-     * Download Builder Pass PNG
-     */
+    // --------------------------------
+    // 3. Download Builder Pass
+    // --------------------------------
 
     const imageResponse =
       await fetch(imageUrl);
 
     if (!imageResponse.ok) {
       return res.status(400).json({
-        error: 'Could not download Builder Pass image'
+        error:
+          'Could not download Builder Pass image'
       });
     }
 
@@ -77,47 +75,57 @@ export default async function handler(req, res) {
         await imageResponse.arrayBuffer()
       );
 
-    /*
-     * X media upload
-     *
-     * The exact media-upload endpoint/authentication
-     * depends on the X API access available to your app.
-     */
+    // X image upload limit is 5 MB.
+    if (imageBuffer.length > 5 * 1024 * 1024) {
+      return res.status(400).json({
+        error:
+          'Builder Pass PNG is larger than X 5MB image limit'
+      });
+    }
 
-    const mediaForm = new FormData();
+    // --------------------------------
+    // 4. Convert PNG to Base64
+    // --------------------------------
 
-    mediaForm.append(
-      'media',
-      new Blob(
-        [imageBuffer],
-        { type: 'image/png' }
-      ),
-      'HH-Goa-2026-Builder-Pass.png'
-    );
+    const base64Image =
+      imageBuffer.toString('base64');
+
+    // --------------------------------
+    // 5. Upload image to X
+    // --------------------------------
 
     const mediaResponse =
       await fetch(
         'https://api.x.com/2/media/upload',
         {
           method: 'POST',
+
           headers: {
             Authorization:
-              `Bearer ${accessToken}`
+              `Bearer ${accessToken}`,
+
+            'Content-Type':
+              'application/json'
           },
-          body: mediaForm
+
+          body: JSON.stringify({
+            media: base64Image,
+            media_category: 'tweet_image',
+            media_type: 'image/png',
+            shared: false
+          })
         }
       );
 
     const mediaData =
       await mediaResponse.json();
 
+    console.log(
+      'X media response:',
+      mediaData
+    );
+
     if (!mediaResponse.ok) {
-
-      console.error(
-        'X media upload error:',
-        mediaData
-      );
-
       return res.status(
         mediaResponse.status
       ).json({
@@ -125,37 +133,45 @@ export default async function handler(req, res) {
           mediaData?.detail ||
           mediaData?.title ||
           'X image upload failed',
+
         details: mediaData
       });
     }
 
+    // --------------------------------
+    // 6. Get media ID
+    // --------------------------------
+
     const mediaId =
-      mediaData?.data?.id ||
-      mediaData?.id;
+      mediaData?.data?.id;
 
     if (!mediaId) {
       return res.status(502).json({
         error:
           'X did not return a media ID',
+
         details: mediaData
       });
     }
 
-    /*
-     * Create X post with image
-     */
+    // --------------------------------
+    // 7. Create X post
+    // --------------------------------
 
     const postResponse =
       await fetch(
         'https://api.x.com/2/tweets',
         {
           method: 'POST',
+
           headers: {
             Authorization:
               `Bearer ${accessToken}`,
+
             'Content-Type':
               'application/json'
           },
+
           body: JSON.stringify({
             text:
               text ||
@@ -173,13 +189,12 @@ export default async function handler(req, res) {
     const postData =
       await postResponse.json();
 
+    console.log(
+      'X post response:',
+      postData
+    );
+
     if (!postResponse.ok) {
-
-      console.error(
-        'X post error:',
-        postData
-      );
-
       return res.status(
         postResponse.status
       ).json({
@@ -187,9 +202,14 @@ export default async function handler(req, res) {
           postData?.detail ||
           postData?.title ||
           'Could not create X post',
+
         details: postData
       });
     }
+
+    // --------------------------------
+    // 8. Success
+    // --------------------------------
 
     return res.status(200).json({
       success: true,
