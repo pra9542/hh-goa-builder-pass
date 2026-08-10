@@ -32,10 +32,15 @@ export default async function handler(req, res) {
     // --------------------------------
 
     const cookies = parseCookies(
-      req.headers.cookie || ''
-    );
+  req.headers.cookie || ''
+);
 
-    const accessToken = cookies.x_access_token;
+const accessToken = cookies.x_access_token;
+
+console.log(
+  'X token present:',
+  !!accessToken
+);
 
     if (!accessToken) {
       return res.status(401).json({
