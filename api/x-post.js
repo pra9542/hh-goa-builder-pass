@@ -37,6 +37,19 @@ export default async function handler(req, res) {
     );
 
     const accessToken = cookies.x_access_token;
+    const meResponse = await fetch(
+  'https://api.x.com/2/users/me',
+  {
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  }
+);
+
+const meData = await meResponse.json();
+
+console.log('X ME status:', meResponse.status);
+console.log('X ME response:', meData);
 
     if (!accessToken) {
       return res.status(401).json({
