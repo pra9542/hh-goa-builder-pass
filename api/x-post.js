@@ -1,3 +1,4 @@
+
 function parseCookies(cookieHeader = '') {
   const cookies = {};
 
@@ -9,7 +10,11 @@ function parseCookies(cookieHeader = '') {
     const key = part.slice(0, index).trim();
     const value = part.slice(index + 1).trim();
 
-    cookies[key] = decodeURIComponent(value);
+    try {
+      cookies[key] = decodeURIComponent(value);
+    } catch {
+      cookies[key] = value;
+    }
   });
 
   return cookies;
@@ -24,15 +29,14 @@ export default async function handler(req, res) {
 
   try {
     // --------------------------------
-    // 1. Get X access token
+    // 1. Get OAuth 2.0 access token
     // --------------------------------
 
     const cookies = parseCookies(
       req.headers.cookie || ''
     );
 
-    const accessToken =
-      cookies.x_access_token;
+    const accessToken = cookies.x_access_token;
 
     if (!accessToken) {
       return res.status(401).json({
@@ -60,22 +64,24 @@ export default async function handler(req, res) {
     // 3. Download Builder Pass
     // --------------------------------
 
-    const imageResponse =
-      await fetch(imageUrl);
+    const imageResponse = await fetch(imageUrl);
 
     if (!imageResponse.ok) {
       return res.status(400).json({
-        error:
-          'Could not download Builder Pass image'
+        error: 'Could not download Builder Pass image'
       });
     }
 
-    const imageBuffer =
-      Buffer.from(
-        await imageResponse.arrayBuffer()
-      );
+    const imageBuffer = Buffer.from(
+      await imageResponse.arrayBuffer()
+    );
 
-    // X image upload limit is 5 MB.
+    console.log(
+      'Builder Pass size:',
+      imageBuffer.length,
+      'bytes'
+    );
+
     if (imageBuffer.length > 5 * 1024 * 1024) {
       return res.status(400).json({
         error:
@@ -84,7 +90,7 @@ export default async function handler(req, res) {
     }
 
     // --------------------------------
-    // 4. Convert PNG to Base64
+    // 4. Convert PNG to base64
     // --------------------------------
 
     const base64Image =
@@ -94,31 +100,47 @@ export default async function handler(req, res) {
     // 5. Upload image to X
     // --------------------------------
 
-    const mediaResponse =
-      await fetch(
-        'https://api.x.com/2/media/upload',
-        {
-          method: 'POST',
+    console.log('Uploading image to X...');
 
-          headers: {
-            Authorization:
-              `Bearer ${accessToken}`,
+    const mediaResponse = await fetch(
+      'https://api.x.com/2/media/upload',
+      {
+        method: 'POST',
 
-            'Content-Type':
-              'application/json'
-          },
+        headers: {
+          Authorization:
+            `Bearer ${accessToken}`,
 
-          body: JSON.stringify({
-            media: base64Image,
-            media_category: 'tweet_image',
-            media_type: 'image/png',
-            shared: false
-          })
-        }
-      );
+          'Content-Type':
+            'application/json'
+        },
 
-    const mediaData =
-      await mediaResponse.json();
+        body: JSON.stringify({
+          media: base64Image,
+          media_category: 'tweet_image',
+          media_type: 'image/png',
+          shared: false
+        })
+      }
+    );
+
+    const mediaText =
+      await mediaResponse.text();
+
+    let mediaData;
+
+    try {
+      mediaData = JSON.parse(mediaText);
+    } catch {
+      mediaData = {
+        raw: mediaText
+      };
+    }
+
+    console.log(
+      'X media status:',
+      mediaResponse.status
+    );
 
     console.log(
       'X media response:',
@@ -134,7 +156,11 @@ export default async function handler(req, res) {
           mediaData?.title ||
           'X image upload failed',
 
-        details: mediaData
+        xStatus:
+          mediaResponse.status,
+
+        details:
+          mediaData
       });
     }
 
@@ -150,13 +176,23 @@ export default async function handler(req, res) {
         error:
           'X did not return a media ID',
 
-        details: mediaData
+        details:
+          mediaData
       });
     }
+
+    console.log(
+      'X media ID:',
+      mediaId
+    );
 
     // --------------------------------
     // 7. Create X post
     // --------------------------------
+
+    console.log(
+      'Creating X post...'
+    );
 
     const postResponse =
       await fetch(
@@ -186,8 +222,24 @@ export default async function handler(req, res) {
         }
       );
 
-    const postData =
-      await postResponse.json();
+    const postText =
+      await postResponse.text();
+
+    let postData;
+
+    try {
+      postData =
+        JSON.parse(postText);
+    } catch {
+      postData = {
+        raw: postText
+      };
+    }
+
+    console.log(
+      'X post status:',
+      postResponse.status
+    );
 
     console.log(
       'X post response:',
@@ -203,7 +255,11 @@ export default async function handler(req, res) {
           postData?.title ||
           'Could not create X post',
 
-        details: postData
+        xStatus:
+          postResponse.status,
+
+        details:
+          postData
       });
     }
 
@@ -231,3 +287,4 @@ export default async function handler(req, res) {
     });
   }
 }
+
