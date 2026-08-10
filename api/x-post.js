@@ -1,4 +1,3 @@
-
 function parseCookies(cookieHeader = '') {
   const cookies = {};
 
@@ -37,19 +36,6 @@ export default async function handler(req, res) {
     );
 
     const accessToken = cookies.x_access_token;
-    const meResponse = await fetch(
-  'https://api.x.com/2/users/me',
-  {
-    headers: {
-      Authorization: `Bearer ${accessToken}`
-    }
-  }
-);
-
-const meData = await meResponse.json();
-
-console.log('X ME status:', meResponse.status);
-console.log('X ME response:', meData);
 
     if (!accessToken) {
       return res.status(401).json({
@@ -59,7 +45,39 @@ console.log('X ME response:', meData);
     }
 
     // --------------------------------
-    // 2. Get image + text
+    // 2. Verify X account
+    // --------------------------------
+
+    const meResponse = await fetch(
+      'https://api.x.com/2/users/me',
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        }
+      }
+    );
+
+    const meData = await meResponse.json();
+
+    console.log(
+      'X ME status:',
+      meResponse.status
+    );
+
+    console.log(
+      'X ME response:',
+      meData
+    );
+
+    if (!meResponse.ok) {
+      return res.status(meResponse.status).json({
+        error: 'X authentication failed',
+        details: meData
+      });
+    }
+
+    // --------------------------------
+    // 3. Get image + text
     // --------------------------------
 
     const {
@@ -74,20 +92,23 @@ console.log('X ME response:', meData);
     }
 
     // --------------------------------
-    // 3. Download Builder Pass
+    // 4. Download Builder Pass PNG
     // --------------------------------
 
-    const imageResponse = await fetch(imageUrl);
+    const imageResponse =
+      await fetch(imageUrl);
 
     if (!imageResponse.ok) {
       return res.status(400).json({
-        error: 'Could not download Builder Pass image'
+        error:
+          'Could not download Builder Pass image'
       });
     }
 
-    const imageBuffer = Buffer.from(
-      await imageResponse.arrayBuffer()
-    );
+    const imageBuffer =
+      Buffer.from(
+        await imageResponse.arrayBuffer()
+      );
 
     console.log(
       'Builder Pass size:',
@@ -95,7 +116,10 @@ console.log('X ME response:', meData);
       'bytes'
     );
 
-    if (imageBuffer.length > 5 * 1024 * 1024) {
+    if (
+      imageBuffer.length >
+      5 * 1024 * 1024
+    ) {
       return res.status(400).json({
         error:
           'Builder Pass PNG is larger than X 5MB image limit'
@@ -103,39 +127,52 @@ console.log('X ME response:', meData);
     }
 
     // --------------------------------
-    // 4. Convert PNG to base64
-    // --------------------------------
-
-    const base64Image =
-      imageBuffer.toString('base64');
-
-    // --------------------------------
     // 5. Upload image to X
     // --------------------------------
 
-    console.log('Uploading image to X...');
+    console.log(
+      'Uploading image to X...'
+    );
 
-    const mediaResponse = await fetch(
-      'https://api.x.com/2/media/upload',
+    /*
+     * X media upload expects the media
+     * data as multipart form data.
+     */
+
+    const form = new FormData();
+
+    const imageBlob = new Blob(
+      [imageBuffer],
       {
-        method: 'POST',
-
-        headers: {
-          Authorization:
-            `Bearer ${accessToken}`,
-
-          'Content-Type':
-            'application/json'
-        },
-
-        body: JSON.stringify({
-          media: base64Image,
-          media_category: 'tweet_image',
-          media_type: 'image/png',
-          shared: false
-        })
+        type: 'image/png'
       }
     );
+
+    form.append(
+      'media',
+      imageBlob,
+      'builder-pass.png'
+    );
+
+    form.append(
+      'media_category',
+      'tweet_image'
+    );
+
+    const mediaResponse =
+      await fetch(
+        'https://api.x.com/2/media/upload',
+        {
+          method: 'POST',
+
+          headers: {
+            Authorization:
+              `Bearer ${accessToken}`
+          },
+
+          body: form
+        }
+      );
 
     const mediaText =
       await mediaResponse.text();
@@ -143,7 +180,8 @@ console.log('X ME response:', meData);
     let mediaData;
 
     try {
-      mediaData = JSON.parse(mediaText);
+      mediaData =
+        JSON.parse(mediaText);
     } catch {
       mediaData = {
         raw: mediaText
@@ -182,7 +220,9 @@ console.log('X ME response:', meData);
     // --------------------------------
 
     const mediaId =
-      mediaData?.data?.id;
+      mediaData?.data?.id ||
+      mediaData?.data?.media_id_string ||
+      mediaData?.media_id_string;
 
     if (!mediaId) {
       return res.status(502).json({
@@ -228,7 +268,7 @@ console.log('X ME response:', meData);
 
             media: {
               media_ids: [
-                mediaId
+                String(mediaId)
               ]
             }
           })
@@ -287,7 +327,6 @@ console.log('X ME response:', meData);
     });
 
   } catch (error) {
-
     console.error(
       'X post error:',
       error
@@ -300,4 +339,3 @@ console.log('X ME response:', meData);
     });
   }
 }
-
