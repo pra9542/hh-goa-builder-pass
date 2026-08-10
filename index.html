@@ -450,116 +450,110 @@ $('copyId').onclick=async()=>{
 };
 
 // Upload the generated Builder Pass PNG to the Vercel API.
-async function uploadForXShare(blob){
-  const form=new FormData();
-  form.append('image',blob,'HH-Goa-2026-Builder-Pass.png');
-  form.append('name',$('name').value || 'HH Goa Builder');
+async function uploadForXShare(blob) {
+  const form = new FormData();
 
-  const res=await fetch('/api/upload',{
-    method:'POST',
-    body:form
+  form.append(
+    'image',
+    blob,
+    'HH-Goa-2026-Builder-Pass.png'
+  );
+
+  form.append(
+    'name',
+    $('name').value || 'HH Goa Builder'
+  );
+
+  const response = await fetch('/api/upload', {
+    method: 'POST',
+    body: form
   });
 
-  if(!res.ok){
-    let message='Upload failed ('+res.status+')';
-    try{
-      const errorData=await res.json();
-      if(errorData && errorData.error) message=errorData.error;
-    }catch(_){ }
-    throw new Error(message);
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.error || 'PNG upload failed'
+    );
   }
 
-  return await res.json();
+  return data;
 }
 
 // Share the generated PNG through the public /share URL.
 // X intent cannot directly attach a local PNG file; the image is uploaded
 // first, then the public share URL is passed to X so X can create a preview.
-async function shareBuilderPass(){
-  const text=`I’m building in Goa 🌴 with HH Goa 2026. #FrameInGoa #HHGoa2026`;
-  const shareBtn=$('share');
-  const original=shareBtn ? shareBtn.innerHTML : '';
+async function shareBuilderPass() {
+  const text =
+    "I’m building in Goa 🌴 with HH Goa 2026. #FrameInGoa #HHGoa2026";
 
-  // Open X immediately from the user click to avoid popup blocking.
-  const firstXUrl=
-    'https://x.com/intent/post?text='+encodeURIComponent(text);
+  const shareBtn = $('share');
+  const original = shareBtn ? shareBtn.innerHTML : '';
 
-  const xWindow=window.open(firstXUrl,'_blank');
-
-  if(!xWindow){
-    window.location.href=firstXUrl;
-    return;
-  }
-
-  try{
-    if(!hasImage){
-      throw new Error('Please add a photo before sharing.');
+  try {
+    if (shareBtn) {
+      shareBtn.disabled = true;
+      shareBtn.innerHTML = '⏳ Creating PNG...';
     }
 
-    if(shareBtn){
-      shareBtn.disabled=true;
-      shareBtn.innerHTML='⏳ Preparing PNG…';
-    }
-
-    // Make sure the latest zoom/position/text changes are rendered.
-    draw();
-
-    // Convert the finished Builder Pass canvas to PNG.
-    const blob=await new Promise(resolve=>{
-      canvas.toBlob(resolve,'image/png');
+    // 1. Create PNG from Builder Pass canvas
+    const blob = await new Promise((resolve) => {
+      canvas.toBlob(resolve, 'image/png');
     });
 
-    if(!blob){
+    if (!blob) {
       throw new Error('Could not create PNG');
     }
 
-    console.log('Builder Pass PNG created:',blob.size,'bytes');
+    console.log('PNG created:', blob.size, 'bytes');
 
-    if(shareBtn){
-      shareBtn.innerHTML='⏳ Uploading PNG…';
+    // 2. Upload PNG to your Vercel backend
+    if (shareBtn) {
+      shareBtn.innerHTML = '⏳ Uploading PNG...';
     }
 
-    // Upload PNG to /api/upload.
-    const data=await uploadForXShare(blob);
-    console.log('Upload response:',data);
+    const data = await uploadForXShare(blob);
 
-    const shareUrl=data && data.shareUrl;
+    console.log('Upload response:', data);
 
-    if(!shareUrl){
-      throw new Error('No shareUrl returned by /api/upload');
+    if (!data || !data.shareUrl) {
+      throw new Error('No share URL returned from server');
     }
 
-    console.log('Public Builder Pass URL:',shareUrl);
+    // 3. Create X URL containing the public Builder Pass URL
+    const xUrl =
+      'https://x.com/intent/post?text=' +
+      encodeURIComponent(text) +
+      '&url=' +
+      encodeURIComponent(data.shareUrl);
 
-    // Add the public Builder Pass URL to the X post.
-    const xUrl=
-      'https://x.com/intent/post?text='+
-      encodeURIComponent(text)+
-      '&url='+
-      encodeURIComponent(shareUrl);
+    console.log('X URL:', xUrl);
 
-    xWindow.location.href=xUrl;
-    toast('PNG uploaded and X share link is ready ✓');
+    // 4. Open X
+    window.open(xUrl, '_blank');
 
-  }catch(err){
-    console.error('X share error:',err);
-    toast(err && err.message ? err.message : 'X sharing failed');
+    toast('Builder Pass uploaded ✓');
 
-    // Keep X open with the text-only post if upload fails.
-    try{
-      xWindow.location.href=firstXUrl;
-    }catch(_){ }
+  } catch (error) {
+    console.error('Share error:', error);
 
-  }finally{
-    if(shareBtn){
-      shareBtn.disabled=false;
-      shareBtn.innerHTML=original || '𝕏 Share on X';
+    alert(
+      'Builder Pass upload failed.\n\n' +
+      error.message
+    );
+
+  } finally {
+    if (shareBtn) {
+      shareBtn.disabled = false;
+      shareBtn.innerHTML =
+        original || '𝕏 Share on X';
     }
   }
 }
 
-$('share').onclick=shareBuilderPass;
-$('nativeShare').onclick=shareBuilderPass;
+$('share').onclick = shareBuilderPass;
+$('nativeShare').onclick = shareBuilderPass;
+
 
 document.querySelectorAll('.hero-action').forEach(btn => {
   btn.addEventListener('click', async () => {
