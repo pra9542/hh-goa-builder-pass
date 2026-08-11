@@ -1038,8 +1038,11 @@ async function shareBuilderPass() {
       shareBtn.innerHTML = '⏳ Opening X...';
     }
 
-    const shareText =
-      `${text}\n\n${uploadData.imageUrl}`;
+    const websiteUrl =
+  'https://hh-goa-builder-pass.vercel.app';
+
+const shareText =
+  `${text}\n\nCreate your Builder Pass:\n${websiteUrl}\n\nMy Builder Pass:\n${uploadData.imageUrl}`;
 
     // 4. Open X
     const xUrl =
