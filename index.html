@@ -560,6 +560,25 @@
     .camera-error{min-height:17px;margin:0;padding:0 18px 15px;color:#a63d35;font-size:10px;line-height:1.45;text-align:center}
     @media(max-width:640px){.camera-modal{padding:10px}.camera-modal-card{border-radius:22px}}
 
+    .crop-controls-below{
+      margin-top:18px;
+      padding:18px;
+      border:1px solid var(--line);
+      border-radius:22px;
+      background:rgba(255,255,255,.72);
+    }
+    .crop-controls-below .section-title{
+      margin-top:0;
+    }
+    .crop-controls-below .range-shell{
+      margin-bottom:14px;
+    }
+    @media(max-width:900px){
+      .crop-controls-below{
+        margin-top:14px;
+      }
+    }
+
     #toast{
       position:fixed;
       right:20px;bottom:20px;
@@ -666,7 +685,7 @@
           <div class="panel-intro">
             <div class="eyebrow">Step 01 · Your photo</div>
             <h3>Frame your moment.</h3>
-            <p>Upload a clear portrait, then use the crop controls to place yourself exactly where you want.</p>
+            <p>Upload a clear portrait, then fine-tune your framing below the Builder Pass.</p>
           </div>
 
           <div class="drop" id="drop">
@@ -681,23 +700,6 @@
             </div>
           </div>
 
-          <div class="section-title">Fine tune your frame</div>
-          <div class="range-shell">
-            <div class="control">
-              <label>Zoom <span id="zoomVal">1.00×</span></label>
-              <input id="zoom" type="range" min="1" max="3" step=".01" value="1">
-            </div>
-            <div class="control">
-              <label>Horizontal <span id="xVal">50%</span></label>
-              <input id="posX" type="range" min="0" max="100" value="50">
-            </div>
-            <div class="control">
-              <label>Vertical <span id="yVal">50%</span></label>
-              <input id="posY" type="range" min="0" max="100" value="50">
-            </div>
-          </div>
-
-          <button class="btn soft full" id="reset" type="button">↻ Reset crop</button>
           <button class="btn primary full next-btn" data-next="2" type="button">Continue to details →</button>
         </div>
 
@@ -767,7 +769,26 @@
           <div class="canvas-wrap">
             <canvas id="cardCanvas" width="1200" height="760"></canvas>
           </div>
-          <div class="stage-note">Tip: use Zoom, Horizontal and Vertical in Step 01 to frame your face. The final downloaded PNG uses the same crop.</div>
+          <div class="stage-note">Tip: use the controls below the Builder Pass to frame your face. The final downloaded PNG uses the same crop.</div>
+        </div>
+
+        <div class="crop-controls-below">
+          <div class="section-title">Fine tune your frame</div>
+          <div class="range-shell">
+            <div class="control">
+              <label>Zoom <span id="zoomVal">1.00×</span></label>
+              <input id="zoom" type="range" min="1" max="3" step=".01" value="1">
+            </div>
+            <div class="control">
+              <label>Horizontal <span id="xVal">50%</span></label>
+              <input id="posX" type="range" min="0" max="100" value="50">
+            </div>
+            <div class="control">
+              <label>Vertical <span id="yVal">50%</span></label>
+              <input id="posY" type="range" min="0" max="100" value="50">
+            </div>
+          </div>
+          <button class="btn soft full" id="reset" type="button">↻ Reset crop</button>
         </div>
 
         <div class="tip">
