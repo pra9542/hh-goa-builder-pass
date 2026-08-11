@@ -491,41 +491,33 @@
     }
     .crop-guide:before{left:33.33%;top:0;bottom:0;width:1px}
     .crop-guide:after{top:33.33%;left:0;right:0;height:1px}
-    .mobile-crop{
-      margin-top:14px;
-      padding:0;
-      border:0;
-      background:transparent;
-    }
-    .clean-crop-head{
-      margin:0 2px 10px;
-    }
-    .clean-crop-head strong{
-      display:block;
-      font-size:12px;
-      letter-spacing:-.02em;
-    }
-    .clean-crop-head span{
-      display:block;
-      margin-top:3px;
-      color:var(--muted);
-      font-size:9px;
-    }
-    .clean-crop-editor{
+    .mobile-crop{display:block;margin-top:13px;padding:13px;border:1px solid var(--line);border-radius:20px;background:#f5f7f0}
+    .mobile-crop-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+    .mobile-crop-head strong{display:block;font-size:11px}
+    .mobile-crop-head span{display:block;margin-top:3px;color:var(--muted);font-size:9px}
+    .mobile-crop-head b{padding:5px 8px;border-radius:999px;background:#e5f0df;color:var(--leaf-dark);font-size:8px;letter-spacing:1px}
+    .mobile-crop-frame{position:relative;width:min(100%,360px);aspect-ratio:265/235;margin:0 auto;overflow:hidden;border:6px solid white;border-radius:18px;background:#d9e7cf;box-shadow:0 14px 30px rgba(38,63,51,.14)}
+    .mobile-crop-image{position:absolute;inset:-1px;background-repeat:no-repeat;background-position:50% 50%;background-size:cover;transform-origin:center;will-change:transform,background-position}
+    .mobile-crop-grid{position:absolute;inset:0;pointer-events:none;opacity:.55;background:linear-gradient(to right,transparent 33.1%,rgba(255,255,255,.65) 33.2%,rgba(255,255,255,.65) 33.5%,transparent 33.6%,transparent 66.4%,rgba(255,255,255,.65) 66.5%,rgba(255,255,255,.65) 66.8%,transparent 66.9%),linear-gradient(to bottom,transparent 33.1%,rgba(255,255,255,.65) 33.2%,rgba(255,255,255,.65) 33.5%,transparent 33.6%,transparent 66.4%,rgba(255,255,255,.65) 66.5%,rgba(255,255,255,.65) 66.8%,transparent 66.9%)}
+    .mobile-crop-corners{position:absolute;inset:10px;pointer-events:none;border:1px solid rgba(255,255,255,.5);border-radius:10px}
+    .mobile-crop-overlay{position:absolute;inset:0;pointer-events:none}
+    .mobile-crop-label{position:absolute;left:10px;bottom:10px;padding:5px 7px;border-radius:7px;background:rgba(20,30,25,.55);color:white;font-size:7px;letter-spacing:1.2px}
+    .mobile-crop-controls-hint{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:9px;color:var(--muted);font-size:8px}
+    .mobile-crop-controls-hint span{padding:5px 7px;border-radius:999px;background:white;border:1px solid var(--line)}
+
+    .live-crop-editor{
       position:relative;
-      width:100%;
-      max-width:430px;
-      aspect-ratio:1 / .82;
+      width:min(100%,360px);
+      aspect-ratio:265/235;
       margin:0 auto;
       overflow:hidden;
-      border-radius:18px;
-      background:#e8eee3;
-      border:1px solid rgba(37,55,45,.12);
-      box-shadow:0 10px 28px rgba(38,63,51,.10);
+      border-radius:20px;
+      background:#d9e7cf;
+      box-shadow:0 16px 36px rgba(38,63,51,.16);
       touch-action:none;
       user-select:none;
     }
-    .clean-crop-photo{
+    .live-crop-photo{
       position:absolute;
       inset:0;
       background-repeat:no-repeat;
@@ -534,41 +526,66 @@
       transform-origin:center;
       will-change:transform,background-position;
     }
-    .clean-crop-window{
+    .crop-shade{
       position:absolute;
-      left:13%;
-      top:11%;
-      width:74%;
-      height:78%;
+      z-index:2;
+      pointer-events:none;
+      background:rgba(18,27,23,.52);
+    }
+    .crop-shade-top,.crop-shade-bottom{
+      left:0;right:0;height:calc((100% - 68%)/2);
+    }
+    .crop-shade-top{top:0}
+    .crop-shade-bottom{bottom:0}
+    .crop-shade-left,.crop-shade-right{
+      top:16%;bottom:16%;width:16%;
+    }
+    .crop-shade-left{left:0}
+    .crop-shade-right{right:0}
+    .crop-window{
+      position:absolute;
+      z-index:3;
+      left:16%;
+      top:16%;
+      width:68%;
+      height:68%;
       border:2px solid rgba(255,255,255,.96);
-      border-radius:13px;
-      box-shadow:0 0 0 9999px rgba(18,27,23,.25);
+      border-radius:14px;
+      box-shadow:0 0 0 1px rgba(18,27,23,.2),0 0 0 9999px rgba(18,27,23,0);
       pointer-events:none;
     }
-    .clean-crop-grid{
+    .crop-window-grid{
       position:absolute;
       inset:0;
-      opacity:.45;
       background:
-        linear-gradient(to right,
-          transparent 32.8%,rgba(255,255,255,.8) 33%,rgba(255,255,255,.8) 33.4%,transparent 33.6%,
-          transparent 66.4%,rgba(255,255,255,.8) 66.6%,rgba(255,255,255,.8) 67%,transparent 67.2%),
-        linear-gradient(to bottom,
-          transparent 32.8%,rgba(255,255,255,.8) 33%,rgba(255,255,255,.8) 33.4%,transparent 33.6%,
-          transparent 66.4%,rgba(255,255,255,.8) 66.6%,rgba(255,255,255,.8) 67%,transparent 67.2%);
+        linear-gradient(to right,transparent 33%,rgba(255,255,255,.5) 33.2%,rgba(255,255,255,.5) 33.7%,transparent 34%,
+        transparent 66%,rgba(255,255,255,.5) 66.2%,rgba(255,255,255,.5) 66.7%,transparent 67%),
+        linear-gradient(to bottom,transparent 33%,rgba(255,255,255,.5) 33.2%,rgba(255,255,255,.5) 33.7%,transparent 34%,
+        transparent 66%,rgba(255,255,255,.5) 66.2%,rgba(255,255,255,.5) 66.7%,transparent 67%);
     }
-    .clean-crop-corners{
+    .crop-window-corners{
       position:absolute;
       inset:-1px;
-      border-radius:13px;
-      box-shadow:inset 0 0 0 1px rgba(255,255,255,.5);
+      border-radius:14px;
     }
-    .clean-crop-tip{
-      margin:8px 2px 0;
-      color:var(--muted);
-      font-size:8.5px;
-      line-height:1.45;
+    .crop-size-label{
+      position:absolute;
+      z-index:4;
+      left:50%;
+      bottom:9px;
+      transform:translateX(-50%);
+      padding:5px 8px;
+      border-radius:999px;
+      background:rgba(20,30,25,.72);
+      color:#fff;
+      font-size:7px;
+      letter-spacing:1px;
+      white-space:nowrap;
+      pointer-events:none;
     }
+
+    .mobile-crop-hint{margin-top:9px;text-align:center;color:var(--muted);font-size:9px;line-height:1.5}
+    .mobile-crop-hint b{color:var(--ink)}
 
     .stage-note{
       margin:12px 2px 0;
@@ -697,17 +714,6 @@
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
-<style id="direct-crop-style">
-.direct-crop-controls{margin-top:12px;padding:14px 16px;border:1px solid var(--line,#d8ded5);border-radius:16px;background:rgba(255,255,255,.72)}
-.direct-crop-title{font-weight:800;font-size:12px;color:#173b2b}
-.direct-crop-subtitle{margin-top:4px;color:var(--muted,#66746c);font-size:9px}
-.direct-crop-actions{display:flex;justify-content:flex-end;gap:7px;margin-top:10px}
-.direct-crop-actions button{border:1px solid #d6ddd4;background:#fff;border-radius:10px;padding:7px 11px;font-weight:700;cursor:pointer}
-.direct-crop-actions button:hover{transform:translateY(-1px)}
-.clean-crop-editor{cursor:grab}
-.clean-crop-editor.dragging{cursor:grabbing}
-.clean-crop-window{pointer-events:none}
-</style>
 </head>
 
 <body>
@@ -715,15 +721,79 @@
     <div class="hero-art a">🌴</div>
     <div class="hero-art b">✦</div>
 
-    <div class="direct-crop-controls">
-  <div class="direct-crop-title">Fine tune your frame</div>
-  <div class="direct-crop-subtitle">Drag your photo directly in the preview. Use + / − to zoom.</div>
-  <div class="direct-crop-actions">
-    <button type="button" id="cropZoomOut" aria-label="Zoom out">−</button>
-    <button type="button" id="cropZoomIn" aria-label="Zoom in">＋</button>
-    <button type="button" id="cropReset" aria-label="Reset crop">↻ Reset</button>
-  </div>
-</div>
+    <div class="hero-inner">
+      <div class="hero-top">
+        <div class="brand-mini">
+          <div class="brand-mark">HH</div>
+          <div>Hackers &amp; <span>Hustlers</span></div>
+        </div>
+        <div class="status-pill"><i class="status-dot"></i> Builder Pass Generator · Goa 2026</div>
+      </div>
+
+      <div class="hero-copy">
+        <div class="kicker">HH GOA · BUILDER EDITION · 2026</div>
+        <h1>HH <span>Goa</span> <small>2026</small></h1>
+        <h2>BUILDER PASS GENERATOR</h2>
+        <p>Create a personal Goa Builder Pass with your photo, role and builder details. Crop it, style it, preview it and share your finished pass.</p>
+
+        <div class="hero-pills">
+          <button class="pill hero-action" data-action="instant" type="button">⚡ Start instantly</button>
+          <button class="pill hero-action" data-action="branded" type="button">🌿 View the pass</button>
+          <button class="pill hero-action" data-action="share" type="button">𝕏 Share your pass</button>
+          <button class="pill hero-action" data-action="mobile" type="button">↗ Mobile ready</button>
+        </div>
+      </div>
+    </div>
+    <div class="wave"></div>
+  </header>
+
+  <main class="wrap">
+    <section class="app">
+      <aside class="side">
+        <div class="steps">
+          <button class="step active" data-step="1" type="button"><b>1</b> Upload</button>
+          <button class="step" data-step="2" type="button"><b>2</b> Details</button>
+          <button class="step" data-step="3" type="button"><b>3</b> Preview</button>
+        </div>
+
+        <div class="tab-panel active" data-panel="1">
+          <div class="panel-intro">
+            <div class="eyebrow">Step 01 · Your photo</div>
+            <h3>Frame your moment.</h3>
+            <p>Upload a clear portrait, then use the crop controls to place yourself exactly where you want.</p>
+          </div>
+
+          <div class="drop" id="drop">
+            <div>
+              <div class="cloud">↥</div>
+              <strong>Drop your photo here</strong>
+              <div>or choose one from your device</div>
+              <small>JPG · PNG · WebP · HEIC · Max 10MB</small>
+              <div class="photo-actions"><label class="browse" for="photo">Choose photo</label><button class="camera-btn" id="takePhoto" type="button">📷 Take photo</button></div>
+              <input id="photo" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif">
+              <input id="cameraPhoto" type="file" accept="image/*" capture="user">
+            </div>
+          </div>
+
+          <div class="section-title">Fine tune your frame</div>
+          <div class="range-shell">
+            <div class="control">
+              <label>Zoom <span id="zoomVal">1.00×</span></label>
+              <input id="zoom" type="range" min="1" max="3" step=".01" value="1">
+            </div>
+            <div class="control">
+              <label>Horizontal <span id="xVal">50%</span></label>
+              <input id="posX" type="range" min="0" max="100" value="50">
+            </div>
+            <div class="control">
+              <label>Vertical <span id="yVal">50%</span></label>
+              <input id="posY" type="range" min="0" max="100" value="50">
+            </div>
+          </div>
+
+          <button class="btn soft full" id="reset" type="button">↻ Reset crop</button>
+          <button class="btn primary full next-btn" data-next="2" type="button">Continue to details →</button>
+        </div>
 
         <div class="tab-panel" data-panel="2">
           <div class="panel-intro">
@@ -793,22 +863,37 @@
             <div class="crop-guide" aria-hidden="true"></div>
           </div>
           <div class="mobile-crop">
-            <div class="clean-crop-head">
+            <div class="mobile-crop-head">
               <div>
-                <strong>Adjust your photo</strong>
-                <span>Drag to position · use the slider to zoom</span>
+                <strong>LIVE CROP & PREVIEW</strong>
+                <span>Drag the photo inside the frame to position it</span>
               </div>
+              <b>LIVE</b>
             </div>
 
-            <div class="clean-crop-editor" id="mobileCropFrame">
-              <div class="clean-crop-photo" id="mobileCropImage"></div>
-              <div class="clean-crop-window">
-                <div class="clean-crop-grid"></div>
-                <div class="clean-crop-corners"></div>
+            <div class="live-crop-editor" id="mobileCropFrame">
+              <div class="live-crop-photo" id="mobileCropImage"></div>
+
+              <!-- Everything outside this window is dimmed -->
+              <div class="crop-shade crop-shade-top"></div>
+              <div class="crop-shade crop-shade-bottom"></div>
+              <div class="crop-shade crop-shade-left"></div>
+              <div class="crop-shade crop-shade-right"></div>
+
+              <!-- Actual final photo window -->
+              <div class="crop-window" id="cropWindow">
+                <div class="crop-window-grid"></div>
+                <div class="crop-window-corners"></div>
               </div>
+
+              <div class="crop-size-label">FINAL PHOTO AREA</div>
             </div>
 
-            <div class="clean-crop-tip">What you see inside the frame is what goes into your Builder Pass.</div>
+            <div class="mobile-crop-controls-hint">
+              <span>↕ Vertical</span>
+              <span>↔ Horizontal</span>
+              <span>＋ Zoom</span>
+            </div>
           </div>
 
           <div class="stage-note">Tip: use the crop controls in Step 01 to position your face inside the photo area. Your final downloaded PNG uses the same framing.</div>
@@ -1245,77 +1330,6 @@ $('nativeShare').onclick = shareBuilderPass;
 
     draw();
   </script>
-<script id="direct-crop-script">
-(function(){
-  function setupDirectCrop(){
-    const editor = document.getElementById('mobileCropFrame');
-    const zoomIn = document.getElementById('cropZoomIn');
-    const zoomOut = document.getElementById('cropZoomOut');
-    const reset = document.getElementById('cropReset');
-    if(!editor) return;
-
-    let dragging = false, sx = 0, sy = 0, ox = 50, oy = 50;
-
-    const getState = () => (typeof state !== 'undefined' ? state : null);
-    const refresh = () => {
-      if (typeof updateMobileCrop === 'function') updateMobileCrop();
-      // Keep any existing sliders synchronized if they exist.
-      const x = document.getElementById('xRange') || document.getElementById('horizontal');
-      const y = document.getElementById('yRange') || document.getElementById('vertical');
-      const z = document.getElementById('zoomRange') || document.getElementById('zoom');
-      const st = getState();
-      if(st){
-        if(x) x.value = st.x;
-        if(y) y.value = st.y;
-        if(z) z.value = st.zoom;
-      }
-    };
-
-    editor.addEventListener('pointerdown', e => {
-      const st = getState(); if(!st) return;
-      dragging = true;
-      editor.classList.add('dragging');
-      editor.setPointerCapture?.(e.pointerId);
-      sx = e.clientX; sy = e.clientY; ox = Number(st.x); oy = Number(st.y);
-      e.preventDefault();
-    });
-
-    editor.addEventListener('pointermove', e => {
-      if(!dragging) return;
-      const st = getState(); if(!st) return;
-      const rect = editor.getBoundingClientRect();
-      st.x = Math.max(0, Math.min(100, ox + ((e.clientX-sx)/rect.width)*100));
-      st.y = Math.max(0, Math.min(100, oy + ((e.clientY-sy)/rect.height)*100));
-      refresh();
-      e.preventDefault();
-    });
-
-    const stop = e => {
-      if(!dragging) return;
-      dragging = false;
-      editor.classList.remove('dragging');
-      try { editor.releasePointerCapture?.(e.pointerId); } catch {}
-    };
-    editor.addEventListener('pointerup', stop);
-    editor.addEventListener('pointercancel', stop);
-
-    zoomIn?.addEventListener('click', () => {
-      const st=getState(); if(!st) return;
-      st.zoom=Math.min(3, Number(st.zoom)+0.1); refresh();
-    });
-    zoomOut?.addEventListener('click', () => {
-      const st=getState(); if(!st) return;
-      st.zoom=Math.max(1, Number(st.zoom)-0.1); refresh();
-    });
-    reset?.addEventListener('click', () => {
-      const st=getState(); if(!st) return;
-      st.x=50; st.y=50; st.zoom=1; refresh();
-    });
-  }
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setupDirectCrop);
-  else setupDirectCrop();
-})();
-</script>
 </body>
 
 </html>
