@@ -505,6 +505,85 @@
     .mobile-crop-controls-hint{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:9px;color:var(--muted);font-size:8px}
     .mobile-crop-controls-hint span{padding:5px 7px;border-radius:999px;background:white;border:1px solid var(--line)}
 
+    .live-crop-editor{
+      position:relative;
+      width:min(100%,360px);
+      aspect-ratio:265/235;
+      margin:0 auto;
+      overflow:hidden;
+      border-radius:20px;
+      background:#d9e7cf;
+      box-shadow:0 16px 36px rgba(38,63,51,.16);
+      touch-action:none;
+      user-select:none;
+    }
+    .live-crop-photo{
+      position:absolute;
+      inset:0;
+      background-repeat:no-repeat;
+      background-position:50% 50%;
+      background-size:cover;
+      transform-origin:center;
+      will-change:transform,background-position;
+    }
+    .crop-shade{
+      position:absolute;
+      z-index:2;
+      pointer-events:none;
+      background:rgba(18,27,23,.52);
+    }
+    .crop-shade-top,.crop-shade-bottom{
+      left:0;right:0;height:calc((100% - 68%)/2);
+    }
+    .crop-shade-top{top:0}
+    .crop-shade-bottom{bottom:0}
+    .crop-shade-left,.crop-shade-right{
+      top:16%;bottom:16%;width:16%;
+    }
+    .crop-shade-left{left:0}
+    .crop-shade-right{right:0}
+    .crop-window{
+      position:absolute;
+      z-index:3;
+      left:16%;
+      top:16%;
+      width:68%;
+      height:68%;
+      border:2px solid rgba(255,255,255,.96);
+      border-radius:14px;
+      box-shadow:0 0 0 1px rgba(18,27,23,.2),0 0 0 9999px rgba(18,27,23,0);
+      pointer-events:none;
+    }
+    .crop-window-grid{
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(to right,transparent 33%,rgba(255,255,255,.5) 33.2%,rgba(255,255,255,.5) 33.7%,transparent 34%,
+        transparent 66%,rgba(255,255,255,.5) 66.2%,rgba(255,255,255,.5) 66.7%,transparent 67%),
+        linear-gradient(to bottom,transparent 33%,rgba(255,255,255,.5) 33.2%,rgba(255,255,255,.5) 33.7%,transparent 34%,
+        transparent 66%,rgba(255,255,255,.5) 66.2%,rgba(255,255,255,.5) 66.7%,transparent 67%);
+    }
+    .crop-window-corners{
+      position:absolute;
+      inset:-1px;
+      border-radius:14px;
+    }
+    .crop-size-label{
+      position:absolute;
+      z-index:4;
+      left:50%;
+      bottom:9px;
+      transform:translateX(-50%);
+      padding:5px 8px;
+      border-radius:999px;
+      background:rgba(20,30,25,.72);
+      color:#fff;
+      font-size:7px;
+      letter-spacing:1px;
+      white-space:nowrap;
+      pointer-events:none;
+    }
+
     .mobile-crop-hint{margin-top:9px;text-align:center;color:var(--muted);font-size:9px;line-height:1.5}
     .mobile-crop-hint b{color:var(--ink)}
 
@@ -786,23 +865,37 @@
           <div class="mobile-crop">
             <div class="mobile-crop-head">
               <div>
-                <strong>LIVE FRAME PREVIEW</strong>
-                <span>Fine-tune your photo while seeing the final PNG framing</span>
+                <strong>LIVE CROP & PREVIEW</strong>
+                <span>Drag the photo inside the frame to position it</span>
               </div>
               <b>LIVE</b>
             </div>
-            <div class="mobile-crop-frame" id="mobileCropFrame">
-              <div class="mobile-crop-image" id="mobileCropImage"></div>
-              <div class="mobile-crop-overlay" aria-hidden="true">
-                <div class="mobile-crop-grid"></div>
-                <div class="mobile-crop-corners"></div>
-                <div class="mobile-crop-label">PHOTO AREA</div>
+
+            <div class="live-crop-editor" id="mobileCropFrame">
+              <div class="live-crop-photo" id="mobileCropImage"></div>
+
+              <!-- Everything outside this window is dimmed -->
+              <div class="crop-shade crop-shade-top"></div>
+              <div class="crop-shade crop-shade-bottom"></div>
+              <div class="crop-shade crop-shade-left"></div>
+              <div class="crop-shade crop-shade-right"></div>
+
+              <!-- Actual final photo window -->
+              <div class="crop-window" id="cropWindow">
+                <div class="crop-window-grid"></div>
+                <div class="crop-window-corners"></div>
               </div>
+
+              <div class="crop-size-label">FINAL PHOTO AREA</div>
             </div>
+
             <div class="mobile-crop-controls-hint">
-              <span>↕ Vertical</span><span>↔ Horizontal</span><span>＋ Zoom</span>
+              <span>↕ Vertical</span>
+              <span>↔ Horizontal</span>
+              <span>＋ Zoom</span>
             </div>
           </div>
+
           <div class="stage-note">Tip: use the crop controls in Step 01 to position your face inside the photo area. Your final downloaded PNG uses the same framing.</div>
         </div>
 
@@ -1005,9 +1098,8 @@
     );
 
     function updateMobileCrop() {
-      const frame = $('mobileCropFrame');
       const preview = $('mobileCropImage');
-      if (!frame || !preview) return;
+      if (!preview) return;
 
       if (!hasImage || !img.src) {
         preview.style.backgroundImage = '';
